@@ -2,6 +2,8 @@
 #include "HID-Project.h"
 #include "RotaryEncoder.h"
 
+void teste();
+
 #define VOLUME
 #define OBSBTNS
 #define WINBTNS
@@ -12,6 +14,7 @@
 #define KEY 7
 
 boolean ONE_IN, TWO_IN, KEY_IN, ONE_NEW, KEY_NEW = false;
+RotaryEncoder Encoder(KEY, S_ONE);
 #endif
 
 #ifdef OBSBTNS
@@ -30,6 +33,9 @@ void setup()
   pinMode(S_TWO, INPUT_PULLUP);
   pinMode(KEY, INPUT_PULLUP);
 
+  attachInterrupt(digitalPinToInterrupt(S_ONE), teste, CHANGE);
+
+  Serial.begin(9600);
   Consumer.begin();
   BootKeyboard.begin();
 #endif
@@ -37,6 +43,7 @@ void setup()
 
 void loop()
 {
+
 #ifdef VOLUME
   ONE_IN = digitalRead(S_ONE) == LOW;
   TWO_IN = digitalRead(S_TWO) == LOW;
@@ -46,10 +53,12 @@ void loop()
   {
     if (TWO_IN)
     {
+      Serial.println("UP");
       Consumer.write(MEDIA_VOL_UP);
     }
     else
     {
+      Serial.println("DOWN");
       Consumer.write(MEDIA_VOL_DOWN);
     }
   }
@@ -57,9 +66,14 @@ void loop()
 
   if (KEY_IN && !KEY_NEW)
   {
+    Serial.println("BUTTON");
     Consumer.write(MEDIA_PLAY_PAUSE);
   }
   KEY_NEW = KEY_IN;
-
 #endif
+}
+
+void teste()
+{
+  Encoder.tick();
 }
