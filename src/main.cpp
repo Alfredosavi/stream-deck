@@ -13,7 +13,7 @@
 #define S_TWO 6
 #define KEY 7
 
-boolean ONE_IN, TWO_IN, KEY_IN, ONE_NEW, KEY_NEW = false;
+RotaryEncoder encoder(S_ONE, S_TWO);
 #endif
 
 #ifdef OBSBTNS
@@ -26,6 +26,8 @@ int btns[SIZEOBSBTNS] = {BTN1, BTN2, BTN3};
 unsigned long timeOBSBTNS[SIZEOBSBTNS];
 bool press[SIZEOBSBTNS];
 #endif
+
+bool buttonPressed(byte PinButton);
 
 void setup()
 {
@@ -54,15 +56,14 @@ void setup()
 
 void loop()
 {
-
 #ifdef VOLUME
-  ONE_IN = digitalRead(S_ONE) == LOW;
-  TWO_IN = digitalRead(S_TWO) == LOW;
-  KEY_IN = digitalRead(KEY) == LOW;
+  static int pos = 0;
+  encoder.tick();
 
-  if (ONE_IN && !ONE_NEW)
+  int newPos = encoder.getPosition();
+  if (pos != newPos)
   {
-    if (TWO_IN)
+    if (newPos > pos)
     {
       Serial.println("UP");
       Consumer.write(MEDIA_VOL_UP);
@@ -72,15 +73,14 @@ void loop()
       Serial.println("DOWN");
       Consumer.write(MEDIA_VOL_DOWN);
     }
+    pos = newPos;
   }
-  ONE_NEW = ONE_IN;
 
-  if (KEY_IN && !KEY_NEW)
+  if (buttonPressed(KEY))
   {
     Serial.println("BUTTON");
     Consumer.write(MEDIA_PLAY_PAUSE);
   }
-  KEY_NEW = KEY_IN;
 #endif
 
 #ifdef OBSBTNS
@@ -124,3 +124,34 @@ void loop()
   }
 #endif
 }
+
+bool buttonPressed(byte PinButton)
+{
+  static unsigned long swDebounce;
+  bool SW = digitalRead(PinButton);
+  static bool swBefore = 1;
+
+  if (millis() - swDebounce > DEBOUNCE)
+  {
+    if (!SW && swBefore)
+    {
+      swDebounce = millis();
+      swBefore = SW;
+
+      return true;
+    }
+
+    else if (SW && !swBefore)
+    {
+      swDebounce = millis();
+      swBefore = SW;
+    }
+  }
+
+  return false;
+}
+
+// ISR(PCINT1_vect)
+// {
+//   encoder.tick();
+// }
