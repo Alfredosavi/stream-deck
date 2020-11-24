@@ -1,22 +1,35 @@
 # stream-deck
 
-
 Stream Deck é um painel de controle personalizável para streaming ao vivo que pode incluir **N** teclas para: alternar cenas, iniciar mídia e ajustar áudio em tempo real. Você pode criar binds personalizadas, como, por exemplo: abrir programas específicos, iniciar/pausar musicas, aumentar/diminuir volume e um monte de outras coisas que você normalmente teria que fazer com Alt-Tab.
 
 A ideia do projeto é criar um painel de controle customizável com botões dedicados para algumas funções especificas para ganhar agilidade e deixar as coisas mais simples.
 
 
-## Componentes Necessários
-* Arduino Leonardo ou arduino pro micro
-* N botões de pressão (push-button)
-* Módulo Encoder Rotativo (Rotary Decoder Sensor)
-* Jumpers
-* Cabo micro-usb
-* Caixa de projeto pequena
-* Ferro de solda, solda, etc
+## :page_facing_up: Componentes Necessários
+
+* Arduino Leonardo ou arduino pro micro;
+* N botões de pressão (push-button);
+* Módulo Encoder Rotativo (Rotary Decoder Sensor);
+* Jumpers;
+* Cabo micro-usb;
+* Ferro de solda, solda, etc.
 
 
-## Curiosidade
+## 🔥 Instalação e execução
+
+1. Utilizando o [PlataformIO](https://platformio.org/platformio-ide)
+    1. Faça um clone desse repositório;
+    2. Dentro da interface do PlataformIO navegue até `Projects` e depois selecione `Add Existing`;
+    3. Selecione a pasta `cd stream-deck` que foi clonada anteriormente.
+    
+2. Utilizando a [IDE ARDUINO](https://www.arduino.cc/en/software)
+    1. Faça um clone desse repositório;
+    2. Abra o arquivo `-----.ino`;
+    
+  OBS: Certifique-se que tenha instalado as [bibliotecas](#Bibliotecas)
+
+
+## :mag_right: Curiosidade
 
 Já deve ter visto que alguns teclados USB possuem teclas multimídias, como por exemplo aumentar/diminuir volume, reproduzir/pausar. Alguns também possui teclas de atalhos para aplicativos, como e-mail e navegador.
 
@@ -25,33 +38,21 @@ As teclas não enviam um caractere para o computador, existe um processador que 
 A biblioteca **Keyboard/Mouse** do arduino permite apenas enviar as teclas encontradas no teclado **IBM PC** padrão original. As teclas de multimida e do sistema (Hibernação/Despertar/Suspensão) incluem conjuntos separados que não são suportados. Embora os movimentos e cliques da biblioteca Mouse possuem suporte. Por causa disso foi utilizada a biblioteca [**HID-Project**](https://github.com/NicoHood/HID) que libera novos **recursos HID**.
 
 
-## Observações
+## :warning: Observações
 
-1. O projeto necessita de um arduino leonardo ou arduino pro micro porque eles possuem MCU (microcontrolador) ATmega32U4 que contem controlador USB imbutido.
-2. O arduino leonardo possui 20 E/S Digital então a quantidade de botões é limitada. (Pode utilizar CI's para expandir os pinos E/S Digital)
+1. O projeto **necessita** de um **arduino leonardo ou arduino pro micro** porque eles possuem MCU (microcontrolador) ATmega32U4 que contem controlador USB imbutido;
+2. O arduino leonardo possui **20 E/S Digital** então a quantidade de botões é limitada. (Pode utilizar CI's para expandir os pinos E/S Digital);
 3.
 
+## :hammer: Criando um Atalho
 
-Key Definitions (Consumer) | ConsumerKeycode
--------------------------- | :-------------:
-MEDIA_FAST_FORWARD         |   0xB3 
-MEDIA_REWIND	             |   0xB4 
-MEDIA_NEXT	               |   0xB5 
-MEDIA_PREVIOUS	           |   0xB6 
-MEDIA_STOP	               |   0xB7 
-MEDIA_PLAY_PAUSE	         |   0xCD
-MEDIA_VOLUME_MUTE	         |   0xE2 
-MEDIA_VOLUME_UP	           |   0xE9 
-MEDIA_VOLUME_DOWN	         |   0xEA
-CONSUMER_EMAIL_READER	     |   0x18A 
-CONSUMER_CALCULATOR	       |   0x192 
-CONSUMER_EXPLORER	         |   0x194
-CONSUMER_BROWSER_HOME	     |   0x223 
-CONSUMER_BROWSER_BACK	     |   0x224 
-CONSUMER_BROWSER_FORWARD	 |   0x225 
-CONSUMER_BROWSER_REFRESH	 |   0x227 
-CONSUMER_BROWSER_BOOKMARKS |   0x22A
+```bash
+BootKeyboard.press(KEY_LEFT_CTRL);
+BootKeyboard.press(KEY_LEFT_ALT);
+BootKeyboard.write(KEY_DELETE);
+```
 
+Essa tabela representa as teclas mais comuns utilizada nos teclados.
 
 Key	            | Hexadecimal	| Decimal
 --------------- | :---------: | :-----:
@@ -90,6 +91,54 @@ KEY_F9	        |    0xCA	    |  202
 KEY_F10	        |    0xCB	    |  203
 KEY_F11	        |    0xCC	    |  204
 KEY_F12	        |    0xCD	    |  205
+
+
+Essa tabela representa os atalhos da função **Consumer**. Se for utilizar alguma KEY da tabela precisa invocá-la usando a função CONSUMER. Exemplo abrindo uma calculadora:
+
+```bash
+Consumer.write(CONSUMER_CALCULATOR);
+```
+
+Key Definitions (Consumer) | ConsumerKeycode
+-------------------------- | :-------------:
+MEDIA_FAST_FORWARD         |   0xB3 
+MEDIA_REWIND	             |   0xB4 
+MEDIA_NEXT	               |   0xB5 
+MEDIA_PREVIOUS	           |   0xB6 
+MEDIA_STOP	               |   0xB7 
+MEDIA_PLAY_PAUSE	         |   0xCD
+MEDIA_VOLUME_MUTE	         |   0xE2 
+MEDIA_VOLUME_UP	           |   0xE9 
+MEDIA_VOLUME_DOWN	         |   0xEA
+CONSUMER_EMAIL_READER	     |   0x18A 
+CONSUMER_CALCULATOR	       |   0x192 
+CONSUMER_EXPLORER	         |   0x194
+CONSUMER_BROWSER_HOME	     |   0x223 
+CONSUMER_BROWSER_BACK	     |   0x224 
+CONSUMER_BROWSER_FORWARD	 |   0x225 
+CONSUMER_BROWSER_REFRESH	 |   0x227 
+CONSUMER_BROWSER_BOOKMARKS |   0x22A
+
+
+## :package: Bibliotecas
+
+1. Rotary Encoder by: Matthias Hertel
+[RotaryEncoder@1.3.0](https://github.com/mathertel/RotaryEncoder)
+2. HID-Project by: NicoHood
+[HID-Project@2.6.1](https://github.com/NicoHood/HID)
+
+OBS: Se tiver usando a **IDE Arduino** ambas estão disponiveis no **gerenciador de bibliotecas**.
+
+
+## ⚡️ Como contribuir
+
+- Faça um fork desse repositório;
+- Cria uma branch com a sua feature: `git checkout -b minha-feature`;
+- Faça commit das suas alterações: `git commit -m 'feat: Minha nova feature'`;
+- Faça push para a sua branch: `git push origin minha-feature`.
+
+Depois que o merge da sua pull request for feito, você pode deletar a sua branch.
+
 
 ## :memo: Licença
 
