@@ -22,35 +22,57 @@ RotaryEncoder encoder(S_ONE, S_TWO);
 #define BTN3 4
 
 #define SIZEOBSBTNS 3
-int btns[SIZEOBSBTNS] = {BTN1, BTN2, BTN3};
+int btnsOBS[SIZEOBSBTNS] = {BTN1, BTN2, BTN3};
+
 unsigned long timeOBSBTNS[SIZEOBSBTNS];
-bool press[SIZEOBSBTNS];
+bool pressOBS[SIZEOBSBTNS];
+#endif
+
+#ifdef WINBTNS
+#define BTN4 8
+#define BTN5 9
+#define BTN6 10
+#define BTN7 11
+#define BTN8 12
+
+#define SIZEWINBTNS 5
+int btnsWIN[SIZEWINBTNS] = {BTN4, BTN5, BTN6, BTN7, BTN8};
+
+unsigned long timeWINBTNS[SIZEWINBTNS];
+bool pressWIN[SIZEWINBTNS];
 #endif
 
 bool buttonPressed(byte PinButton);
 
 void setup()
 {
-  Serial.begin(9600);
+  Consumer.begin();
+  BootKeyboard.begin();
 
 #ifdef VOLUME
   pinMode(S_ONE, INPUT_PULLUP);
   pinMode(S_TWO, INPUT_PULLUP);
   pinMode(KEY, INPUT_PULLUP);
-
-  Consumer.begin();
 #endif
 
 #ifdef OBSBTNS
   int i;
   for (i = 0; i < SIZEOBSBTNS; i++)
   {
-    pinMode(btns[i], INPUT_PULLUP);
+    pinMode(btnsOBS[i], INPUT_PULLUP);
     timeOBSBTNS[i] = 0;
-    press[i] = false;
+    pressOBS[i] = false;
   }
+#endif
 
-  BootKeyboard.begin();
+#ifdef WINBTNS
+  int j;
+  for (j = 0; j < SIZEWINBTNS; j++)
+  {
+    pinMode(btnsWIN[j], INPUT_PULLUP);
+    timeWINBTNS[j] = 0;
+    pressWIN[i] = false;
+  }
 #endif
 }
 
@@ -65,12 +87,10 @@ void loop()
   {
     if (newPos > pos)
     {
-      Serial.println("UP");
       Consumer.write(MEDIA_VOL_UP);
     }
     else
     {
-      Serial.println("DOWN");
       Consumer.write(MEDIA_VOL_DOWN);
     }
     pos = newPos;
@@ -78,7 +98,6 @@ void loop()
 
   if (buttonPressed(KEY))
   {
-    Serial.println("BUTTON");
     Consumer.write(MEDIA_PLAY_PAUSE);
   }
 #endif
@@ -87,7 +106,7 @@ void loop()
   int i;
   for (i = 0; i < SIZEOBSBTNS; i++)
   {
-    if (digitalRead(btns[i]))
+    if (digitalRead(btnsOBS[i]))
     {
       if (timeOBSBTNS[i] == 0)
       {
@@ -95,17 +114,30 @@ void loop()
       }
       else
       {
-        if (millis() - timeOBSBTNS[i] > DEBOUNCE && !press[i])
+        if (millis() - timeOBSBTNS[i] > DEBOUNCE && !pressOBS[i])
         {
-          press[i] = true;
+          pressOBS[i] = true;
           switch (i)
           {
           case 0:
-            Serial.println("caiu aqui dentro");
-            // BootKeyboard.press(KEY_LEFT_ALT);
-            // BootKeyboard.write(KEY_F4);
-            // BootKeyboard.releaseAll();
+          {
+            BootKeyboard.press(KEY_LEFT_CTRL);
+            BootKeyboard.press(KEY_LEFT_SHIFT);
+            BootKeyboard.press(KEY_LEFT_ALT);
+            BootKeyboard.write(KEY_A);
+            BootKeyboard.releaseAll();
             break;
+          }
+
+          case 1:
+          {
+            break;
+          }
+
+          case 2:
+          {
+            break;
+          }
 
           default:
             break;
@@ -118,7 +150,71 @@ void loop()
       if (timeOBSBTNS[i] != 0)
       {
         timeOBSBTNS[i] = 0;
-        press[i] = false;
+        pressOBS[i] = false;
+      }
+    }
+  }
+#endif
+
+#ifdef WINBTNS
+  int k;
+  for (k = 0; k < SIZEWINBTNS; k++)
+  {
+    if (digitalRead(btnsWIN[k]))
+    {
+      if (timeWINBTNS[k] == 0)
+      {
+        timeWINBTNS[k] = millis();
+      }
+      else
+      {
+        if (millis() - timeWINBTNS[k] > DEBOUNCE && !pressWIN[k])
+        {
+          pressWIN[k] = true;
+          switch (k)
+          {
+          case 0:
+          {
+            break;
+          }
+
+          case 1:
+          {
+            break;
+          }
+
+          case 2:
+          {
+            break;
+          }
+
+          case 3:
+          {
+            break;
+          }
+
+          case 4:
+          {
+            break;
+          }
+
+          case 5:
+          {
+            break;
+          }
+
+          default:
+            break;
+          }
+        }
+      }
+    }
+    else
+    {
+      if (timeWINBTNS[k] != 0)
+      {
+        timeWINBTNS[k] = 0;
+        pressWIN[k] = false;
       }
     }
   }
@@ -150,8 +246,3 @@ bool buttonPressed(byte PinButton)
 
   return false;
 }
-
-// ISR(PCINT1_vect)
-// {
-//   encoder.tick();
-// }
