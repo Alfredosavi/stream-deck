@@ -24,11 +24,11 @@ A ideia do projeto é criar um painel de controle customizável com botões dedi
     
 2. Utilizando a [IDE ARDUINO](https://www.arduino.cc/en/software)
     1. Faça um clone desse repositório;
-    2. Abra o arquivo `.ino` dentro da pasta `sketch_deck_arduino`.
+    2. Abra o arquivo [`.ino`](https://github.com/Alfredosavi/stream-deck/blob/main/sketch_deck_arduino/sketch_deck_arduino.ino) dentro da pasta `sketch_deck_arduino`.
     
     **OBSERVAÇÕES**:
-    1. Certifique-se que tenha instalado as [bibliotecas](#Bibliotecas);
-    2. Certifique-se de selecionar a Placa: `Arduino Leonardo` ou `Arduino Micro` e a Porta na aba `Ferramentas` da IDE Arduino antes de Compilar/Carregar o sketch.
+    1. Certifique-se que tenha **instalado** as [Bibliotecas](#ancora1);
+    2. Certifique-se de selecionar a Placa: `Arduino Leonardo` ou `Arduino Micro` e a Porta na aba `Ferramentas` da **IDE Arduino** antes de Compilar/Carregar o sketch.
 
 
 ## :mag_right: Curiosidade
@@ -37,14 +37,14 @@ Já deve ter visto que alguns teclados USB possuem teclas multimídias, como por
 
 As teclas não enviam um caractere para o computador, existe um processador que identifica as teclas pressionadas e converte essa informação em códigos de varredura para envio serial ao PC. Cada tecla gera dois sinais diferentes: um quando a tecla é pressionada e outro quando volta à posição original (é liberada). O uso dos dois códigos permite que o PC saiba quando uma tecla foi ou não mantida pressionada. A existência de teclas multimídia implica que elas também têm códigos de varredura, então concluí que deveria ser fácil programar um Arduino para enviá-las, já que o Leonardo e o Pro Micro **(Atmega32u4)** podem emular um teclado ou mouse por meio de sua porta USB.
 
-A biblioteca **Keyboard/Mouse** do arduino permite apenas enviar as teclas encontradas no teclado **IBM PC** padrão original. As teclas de multimídia e do sistema (Hibernação/Despertar/Suspensão) incluem conjuntos separados que não são suportados. Embora os movimentos e cliques da biblioteca Mouse possuem suporte. Por causa disso foi utilizada a biblioteca [**HID-Project**](https://github.com/NicoHood/HID) que libera novos **recursos HID**.
+A biblioteca **Keyboard/Mouse** do arduino permite apenas enviar as teclas encontradas no teclado **IBM PC** padrão original. As teclas de multimídia e do sistema (Hibernação/Despertar/Suspensão) incluem conjuntos separados que não são suportados. Embora os movimentos e cliques da **biblioteca Mouse** possuem suporte. Por causa disso foi utilizada a biblioteca [**HID-Project**](https://github.com/NicoHood/HID) que libera novos **recursos HID**.
 
 
 ## :warning: Observações
 
 1. O projeto **necessita** de um **arduino leonardo** ou **arduino pro micro** porque eles possuem **MCU** (microcontrolador) **ATmega32U4** que contem **controlador USB embutido**;
 2. O **arduino leonardo** possui **20 E/S Digital** então a quantidade de botões é **limitada**. (Pode utilizar CI's para expandir os pinos E/S Digital);
-3. O projeto foi feito em uma **protoboard**, então sinta-se à vontade para criar um **case personalizado** para ficar mais `elegante`.
+3. O projeto foi feito em uma **protoboard**, então sinta-se à vontade para criar um **case personalizado** para ficar mais `elegante`. :wink:
 
 ## :hammer: Criando um Atalho
 
@@ -60,7 +60,7 @@ Para facilitar, o código está separado em três seções:
   
   ![OBS CONFIG](https://i.imgur.com/ETwHmAw.png)
   
-  1. Defina um **nome** e um **pino** para o botão. Exemplo:
+  1. Defina um **nome** e um [**pino**](#ancora3) para o botão. Exemplo:
   
   ```c++
 #ifdef OBSBTNS // Pinagem dos botões que vão ser utilizados para atalhos do OBS ... (Nome Botão e Pino)
@@ -89,15 +89,15 @@ int btnsOBS[SIZEOBSBTNS] = {BTN1, BTN2, BTN3}; // Nome dos botões que foi decla
           }
   ```
   
-  1. Utilize a função `press()` para "segurar" uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
-  2. A função `write()` serve para enviar um único caractere. Como se você pressionasse um botão no teclado e o soltasse;
-  3. A função `releaseAll()` serve para "soltar" todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
-  4. Troque os parâmetros das funções pela combinação de teclas que criou nos atalhos do OBS. (a lista de KEYS encontra-se nas tabelas abaixo).
+  1. Utilize a função `press()` para **"segurar"** uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
+  2. A função `write()` serve para enviar um **único caractere**. Como se você pressionasse um botão no teclado e o soltasse;
+  3. A função `releaseAll()` serve para **"soltar"** todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
+  4. Troque os **parâmetros** das funções pela combinação de teclas que criou nos **atalhos do OBS**. (lista de **KEYS** encontra-se nas [tabelas abaixo](#ancora2)).
   
   
   ### Criando Atalhos para funcionalidades do WINDOWS
   
-  1. Defina um **nome** e um **pino** para o botão. Exemplo:
+  1. Defina um **nome** e um [**pino**](#ancora3) para o botão. Exemplo:
   
   ```c++
 #ifdef WINBTNS  // Pinagem dos botões que vão ser utilizados para atalhos do WINDOWS ... (Nome Botão e Pino)
@@ -128,16 +128,17 @@ int btnsOBS[SIZEOBSBTNS] = {BTN1, BTN2, BTN3}; // Nome dos botões que foi decla
     }
   ```
   
-  1. Utilize a função `press()` para "segurar" uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
-  2. A função `write()` serve para enviar um único caractere. Como se pressionasse um botão no teclado e o soltasse;
-  3. A função `releaseAll()` serve para "soltar" todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
-  4. Troque os parâmetros das funções pela combinação de teclas. (a lista de KEYS encontra-se nas tabelas abaixo).
+  1. Utilize a função `press()` para **"segurar"** uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
+  2. A função `write()` serve para enviar um **único caractere**. Como se pressionasse um botão no teclado e o soltasse;
+  3. A função `releaseAll()` serve para **"soltar"** todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
+  4. Troque os **parâmetros** das funções pela combinação de teclas desejadas. (lista de **KEYS** encontra-se nas [tabelas abaixo](#ancora2)).
   
   
   Para abrir um programa com **shortkey** clique em `Propriedades` no atalho do programa e em seguida selecione a aba `Atalho`.
+  
   ![Propriedades Programa](https://i.imgur.com/3SrnC7a.png)
 
-
+<a id="ancora2"></a>
 ## :triangular_flag_on_post: Tabelas KEY
 
 A tabela abaixo representa os atalhos da classe **BootKeyboard**. Se for utilizar alguma **KEY** dessa tabela precisa invocá-la usando a classe `BootKeyboard`. Exemplo: Ativando/Desativando o **CAPS LOCK**:
@@ -213,7 +214,7 @@ CONSUMER_BROWSER_BOOKMARKS |   0x22A
 
 **OBS**: Para uma lista mais completa consulte o arquivo [ImprovedKeylayouts.txt](ImprovedKeylayouts.txt).
 
-
+<a id="ancora1"></a>
 ## :package: Bibliotecas
 
 1. Rotary Encoder by: Matthias Hertel
@@ -224,6 +225,7 @@ CONSUMER_BROWSER_BOOKMARKS |   0x22A
 OBS: Se tiver usando a **IDE Arduino** ambas estão disponíveis no **gerenciador de bibliotecas**.
 
 
+<a id="ancora3"></a>
 ## :link: Links Úteis
 
 1. [Pinout Arduino Leonardo](http://marcusjenkins.com/wp-content/uploads/2014/06/leonardov2.pdf)
