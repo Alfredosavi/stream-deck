@@ -1,13 +1,13 @@
 # stream-deck
 
-Stream Deck é um painel de controle personalizável para streaming ao vivo que pode incluir **N** teclas para: alternar cenas, iniciar mídia e ajustar áudio em tempo real. Você pode criar binds personalizadas, como, por exemplo: abrir programas específicos, iniciar/pausar musicas, aumentar/diminuir volume e um monte de outras coisas que você normalmente teria que fazer com Alt-Tab.
+Stream Deck é um painel de controle personalizável para streaming ao vivo que pode incluir **N** teclas para: alternar cenas, iniciar mídia e ajustar áudio em tempo real. Você pode criar binds personalizadas, como, por exemplo: abrir programas específicos, iniciar/pausar músicas, aumentar/diminuir volume e um monte de outras coisas que você normalmente teria que fazer com Alt-Tab.
 
 A ideia do projeto é criar um painel de controle customizável com botões dedicados para algumas funções especificas para ganhar agilidade e deixar as coisas mais simples.
 
 
 ## :page_facing_up: Componentes Necessários
 
-* Arduino Leonardo ou arduino pro micro;
+* Arduino leonardo ou arduino pro micro;
 * N botões de pressão (push-button);
 * Módulo Encoder Rotativo (Rotary Decoder Sensor);
 * Jumpers;
@@ -24,9 +24,11 @@ A ideia do projeto é criar um painel de controle customizável com botões dedi
     
 2. Utilizando a [IDE ARDUINO](https://www.arduino.cc/en/software)
     1. Faça um clone desse repositório;
-    2. Abra o arquivo `-----.ino`;
+    2. Abra o arquivo `.ino` dentro da pasta `sketch_deck_arduino`.
     
-  OBS: Certifique-se que tenha instalado as [bibliotecas](#Bibliotecas)
+    **OBSERVAÇÕES**:
+    1. Certifique-se que tenha instalado as [bibliotecas](#Bibliotecas);
+    2. Certifique-se de selecionar a Placa: `Arduino Leonardo` ou `Arduino Micro` e a Porta na aba `Ferramentas` da IDE Arduino antes de Compilar/Carregar o sketch.
 
 
 ## :mag_right: Curiosidade
@@ -35,24 +37,114 @@ Já deve ter visto que alguns teclados USB possuem teclas multimídias, como por
 
 As teclas não enviam um caractere para o computador, existe um processador que identifica as teclas pressionadas e converte essa informação em códigos de varredura para envio serial ao PC. Cada tecla gera dois sinais diferentes: um quando a tecla é pressionada e outro quando volta à posição original (é liberada). O uso dos dois códigos permite que o PC saiba quando uma tecla foi ou não mantida pressionada. A existência de teclas multimídia implica que elas também têm códigos de varredura, então concluí que deveria ser fácil programar um Arduino para enviá-las, já que o Leonardo e o Pro Micro **(Atmega32u4)** podem emular um teclado ou mouse por meio de sua porta USB.
 
-A biblioteca **Keyboard/Mouse** do arduino permite apenas enviar as teclas encontradas no teclado **IBM PC** padrão original. As teclas de multimida e do sistema (Hibernação/Despertar/Suspensão) incluem conjuntos separados que não são suportados. Embora os movimentos e cliques da biblioteca Mouse possuem suporte. Por causa disso foi utilizada a biblioteca [**HID-Project**](https://github.com/NicoHood/HID) que libera novos **recursos HID**.
+A biblioteca **Keyboard/Mouse** do arduino permite apenas enviar as teclas encontradas no teclado **IBM PC** padrão original. As teclas de multimídia e do sistema (Hibernação/Despertar/Suspensão) incluem conjuntos separados que não são suportados. Embora os movimentos e cliques da biblioteca Mouse possuem suporte. Por causa disso foi utilizada a biblioteca [**HID-Project**](https://github.com/NicoHood/HID) que libera novos **recursos HID**.
 
 
 ## :warning: Observações
 
-1. O projeto **necessita** de um **arduino leonardo ou arduino pro micro** porque eles possuem MCU (microcontrolador) ATmega32U4 que contem controlador USB imbutido;
-2. O arduino leonardo possui **20 E/S Digital** então a quantidade de botões é limitada. (Pode utilizar CI's para expandir os pinos E/S Digital);
-3.
+1. O projeto **necessita** de um **arduino leonardo** ou **arduino pro micro** porque eles possuem **MCU** (microcontrolador) **ATmega32U4** que contem **controlador USB embutido**;
+2. O **arduino leonardo** possui **20 E/S Digital** então a quantidade de botões é **limitada**. (Pode utilizar CI's para expandir os pinos E/S Digital);
+3. O projeto foi feito em uma **protoboard**, então sinta-se à vontade para criar um **case personalizado** para ficar mais `elegante`.
 
 ## :hammer: Criando um Atalho
 
-```bash
-BootKeyboard.press(KEY_LEFT_CTRL);
-BootKeyboard.press(KEY_LEFT_ALT);
-BootKeyboard.write(KEY_DELETE);
-```
+Para facilitar, o código está separado em três seções:
+  1. `VOLUME` - Destinado ao controle de Volume +/- e botão de Pause/Resume utilizando o encoder rotativo.
+  2. `OBSBTNS` (OBS botões) - Destinado a configuração dos botões e shortkeys relacionados com o OBS.
+  3. `WINBTNS` (Windows botões) - Destinado a configuração dos botões e shortkeys relacionados ao sistema WINDOWS.
+  
+  ### Criando Atalhos voltados ao OBS
+  
+  Primeiramente entre nas `configurações` de `teclas de atalho` do OBS e crie atalhos para as funções que deseja.
+  Como por exemplo: transições de cenas/telas, Ocultar Cenas, Mutar/Desmutar.
+  
+  ![OBS CONFIG](https://i.imgur.com/ETwHmAw.png)
+  
+  1. Defina um **nome** e um **pino** para o botão. Exemplo:
+  
+  ```c++
+#ifdef OBSBTNS // Pinagem dos botões que vão ser utilizados para atalhos do OBS ... (Nome Botão e Pino)
+#define BTN1 2 // Botão BTN1 no pin 2
+#define BTN2 3 // Botão BTN2 no pin 3
+#define BTN3 4 // Botão BTN3 no pin 4
+  ```
+  
+  2. Em `SIZEOBSBTNS` coloque a quantidade de botões que criou no passo anterior e inclua eles no vetor `btnsOBS[SIZEOBSBTNS]`. Exemplo:
+  
+  ```c++
+#define SIZEOBSBTNS 3                          // Quantidade de botões que foi declarado em cima (ATUALIZAR CASO VOCE ALTERE)
+int btnsOBS[SIZEOBSBTNS] = {BTN1, BTN2, BTN3}; // Nome dos botões que foi declarado em cima (ATUALIZAR CASO VOCE ALTERE)
+  ```
+  
+  3. Em `OBSBTNS` dentro da função `void loop()` inclua um `case X` dentro do `switch`, onde **X** é um número de 0 até o tamanho do seu vetor `SIZEOBSBTNS`. Exemplo:
+  ```c++
+  case 0: // Atalho para mudar de Cena OBS
+          {
+            BootKeyboard.press(KEY_LEFT_CTRL);  // Tecla CTRL
+            BootKeyboard.press(KEY_LEFT_ALT);   // Tecla ALT
+            BootKeyboard.press(KEY_LEFT_SHIFT); // Tecla SHIFT
+            BootKeyboard.write(KEY_A);          // Tecla "A"
+            BootKeyboard.releaseAll();          // Soltar as teclas CTRL, ALT, SHIFT
+            break;
+          }
+  ```
+  
+  1. Utilize a função `press()` para "segurar" uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
+  2. A função `write()` serve para enviar um único caractere. Como se você pressionasse um botão no teclado e o soltasse;
+  3. A função `releaseAll()` serve para "soltar" todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
+  4. Troque os parâmetros das funções pela combinação de teclas que criou nos atalhos do OBS. (a lista de KEYS encontra-se nas tabelas abaixo).
+  
+  
+  ### Criando Atalhos para funcionalidades do WINDOWS
+  
+  1. Defina um **nome** e um **pino** para o botão. Exemplo:
+  
+  ```c++
+#ifdef WINBTNS  // Pinagem dos botões que vão ser utilizados para atalhos do WINDOWS ... (Nome Botão e Pino)
+#define BTN4 8  // Botão BTN8 no pin 8
+#define BTN5 9  // Botão BTN9 no pin 9
+#define BTN6 10 // Botão BTN10 no pin 10
+#define BTN7 11 // Botão BTN11 no pin 11
+#define BTN8 12 // Botão BTN11 no pin 12
+  ```
+  
+  2. Em `SIZEWINBTNS` coloque a quantidade de botões que criou no passo anterior e inclua eles no vetor `btnsWIN[SIZEWINBTNS]`. Exemplo:
+  
+  ```c++
+  #define SIZEWINBTNS 5                                      // Quantidade de botões que foi declarado em cima (ATUALIZAR CASO VOCE ALTERE)
+  int btnsWIN[SIZEWINBTNS] = {BTN4, BTN5, BTN6, BTN7, BTN8}; // Nome dos botões que foi declarado em cima (ATUALIZAR CASO VOCE ALTERE)
+  ```
+  
+  3. Em `WINBTNS` dentro da função `void loop()` inclua um `case X` dentro do `switch`, onde **X** é um número de 0 até o tamanho do seu vetor `SIZEWINBTNS`. Exemplo:
+  ```c++
+  case 0: // Abrir o aplicativo GITHUB DESKTOP
+    {
+      BootKeyboard.press(KEY_LEFT_CTRL);  // Tecla CTRL
+      BootKeyboard.press(KEY_LEFT_ALT);   // Tecla ALT
+      BootKeyboard.press(KEY_LEFT_SHIFT); // Tecla SHIFT
+      BootKeyboard.write(KEY_G);          // Tecla "G"
+      BootKeyboard.releaseAll();          // Soltar as teclas CTRL, ALT, SHIFT
+      break;
+    }
+  ```
+  
+  1. Utilize a função `press()` para "segurar" uma tecla. Geralmente utilizada para teclas como: `Ctrl`, `Alt`, `Shift` e `Tecla Windows`;
+  2. A função `write()` serve para enviar um único caractere. Como se pressionasse um botão no teclado e o soltasse;
+  3. A função `releaseAll()` serve para "soltar" todas as teclas que "segurou". **Função obrigatoria** caso utilize a função `press()`;
+  4. Troque os parâmetros das funções pela combinação de teclas. (a lista de KEYS encontra-se nas tabelas abaixo).
+  
+  
+  Para abrir um programa com **shortkey** clique em `Propriedades` no atalho do programa e em seguida selecione a aba `Atalho`.
+  ![Propriedades Programa](https://i.imgur.com/3SrnC7a.png)
 
-Essa tabela representa as teclas mais comuns utilizada nos teclados.
+
+## :triangular_flag_on_post: Tabelas KEY
+
+A tabela abaixo representa os atalhos da classe **BootKeyboard**. Se for utilizar alguma **KEY** dessa tabela precisa invocá-la usando a classe `BootKeyboard`. Exemplo: Ativando/Desativando o **CAPS LOCK**:
+
+```bash
+BootKeyboard.write(KEY_CAPS_LOCK);
+```
 
 Key	            | Hexadecimal	| Decimal
 --------------- | :---------: | :-----:
@@ -93,7 +185,7 @@ KEY_F11	        |    0xCC	    |  204
 KEY_F12	        |    0xCD	    |  205
 
 
-Essa tabela representa os atalhos da função **Consumer**. Se for utilizar alguma KEY da tabela precisa invocá-la usando a função CONSUMER. Exemplo abrindo uma calculadora:
+A tabela abaixo representa os atalhos da classe **Consumer**. Se for utilizar alguma **KEY** da tabela precisa invocá-la usando a classe `CONSUMER`. Exemplo abrindo uma calculadora:
 
 ```bash
 Consumer.write(CONSUMER_CALCULATOR);
@@ -119,6 +211,8 @@ CONSUMER_BROWSER_FORWARD	 |   0x225
 CONSUMER_BROWSER_REFRESH	 |   0x227 
 CONSUMER_BROWSER_BOOKMARKS |   0x22A
 
+**OBS**: Para uma lista mais completa consulte o arquivo [ImprovedKeylayouts.txt](ImprovedKeylayouts.txt).
+
 
 ## :package: Bibliotecas
 
@@ -127,7 +221,13 @@ CONSUMER_BROWSER_BOOKMARKS |   0x22A
 2. HID-Project by: NicoHood
 [HID-Project@2.6.1](https://github.com/NicoHood/HID)
 
-OBS: Se tiver usando a **IDE Arduino** ambas estão disponiveis no **gerenciador de bibliotecas**.
+OBS: Se tiver usando a **IDE Arduino** ambas estão disponíveis no **gerenciador de bibliotecas**.
+
+
+## :link: Links Úteis
+
+1. [Pinout Arduino Leonardo](http://marcusjenkins.com/wp-content/uploads/2014/06/leonardov2.pdf)
+2. [Pintout Arduino Micro](https://arduino.pinout.guide/arduino_micro_pinout_and_ISP_pins.png)
 
 
 ## ⚡️ Como contribuir
